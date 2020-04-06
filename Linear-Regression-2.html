@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Pamela Dekpo" />
+
+
+<title>Linear Regression II</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 45px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h2 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h3 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h4 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h5 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h6 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Data Science for Business I</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Overview</a>
+</li>
+<li>
+  <a href="Summary-Data-Science.html">Inference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Linear Regression
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Linear-Regression-1.html">Linear Regression I</a>
+    </li>
+    <li>
+      <a href="Linear-Regression-2.html">Linear Regression II</a>
+    </li>
+    <li>
+      <a href="Detecting-Problems-in-Regression.html">Detecting Problems in Regression</a>
+    </li>
+    <li>
+      <a href="Predictive-Analysis.html">Predictive Analytics</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Unstruktured-Data.html">Unstruktured Data</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Linear Regression II</h1>
+<h4 class="author">Pamela Dekpo</h4>
+
+</div>
+
+
+<hr />
+<div id="the-multiple-regression-model" class="section level3">
+<h3>The Multiple Regression Model</h3>
+<p>MRM is a model for the association in the population between multiple explanatory variables x1, x2, …, xk and a response y. Multiple regression separates the effects of each explanatory variable on the response and reveals which really matter.</p>
+<div class="figure" style="text-align: center">
+<img src="Bild4.PNG" alt="..." width="50%" />
+<p class="caption">
+…
+</p>
+</div>
+<p><strong>Dummy Variable</strong></p>
+<p>A dummy variable is a variable that only akes values 0 to 1 and usually expresses a qualitative difference (man/woman). Those models are different in the intercept and the slope.</p>
+<div class="figure" style="text-align: center">
+<img src="Bild5.PNG" alt="..." width="50%" />
+<p class="caption">
+…
+</p>
+</div>
+<hr />
+</div>
+<div id="implementation-in-r-using-cases" class="section level2 tabset tabset-fade tabset-pills">
+<h2>Implementation in R using Cases</h2>
+<div id="case-i" class="section level3">
+<h3>Case I</h3>
+<pre class="r"><code># -----------------------------------------------------------------------------------------------
+# Case I: Estimating Sales in the Mall
+# -----------------------------------------------------------------------------------------------
+# Load the data
+
+df &lt;- read_xls(&quot;3_Mallsales.xls&quot;, col_types = c(&quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;,&quot;numeric&quot;))
+
+
+# Plot sales against competitors
+
+plot(df$Competitors ,df$Sales, main = &quot;Sales v.s. Competitors&quot;, xlab = &quot;Competitors&quot;, ylab = &quot;Sales volume in $/sqm&quot;)</code></pre>
+<p><img src="Linear-Regression-2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code># What is the correlation between both variables?
+cor(df$Sales,df$Competitors)</code></pre>
+<pre><code>## [1] 0.06661552</code></pre>
+<pre class="r"><code># Simple regression model
+lm1 &lt;- lm(df$Sales ~ df$Competitors)
+summary(lm1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = df$Sales ~ df$Competitors)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -221.38  -54.47   -4.84   44.16  322.53 
+## 
+## Coefficients:
+##                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)     502.202     25.444   19.74   &lt;2e-16 ***
+## df$Competitors    4.635      8.747    0.53    0.598    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 105.8 on 63 degrees of freedom
+## Multiple R-squared:  0.004438,   Adjusted R-squared:  -0.01136 
+## F-statistic: 0.2808 on 1 and 63 DF,  p-value: 0.598</code></pre>
+<pre class="r"><code>View(df)
+# Plot the residuals against the redicted sales volume
+plot(residuals(lm1),fitted(lm1))</code></pre>
+<p><img src="Linear-Regression-2_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code># Let us calculate a model in which we also incorporate the area&#39;s income level as an explanatory variable
+lm2 &lt;- lm(df$Sales ~ df$Competitors + df$Income_Level)
+summary(lm2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = df$Sales ~ df$Competitors + df$Income_Level)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -136.02  -49.76   11.97   48.47  136.90 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)      60.3587    49.2902   1.225 0.225374    
+## df$Competitors  -24.1650     6.3899  -3.782 0.000353 ***
+## df$Income_Level   7.9660     0.8382   9.503 1.03e-13 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 68.03 on 62 degrees of freedom
+## Multiple R-squared:  0.5947, Adjusted R-squared:  0.5817 
+## F-statistic: 45.49 on 2 and 62 DF,  p-value: 6.915e-13</code></pre>
+<pre class="r"><code># Plot the resiudals
+plot(residuals(lm2),fitted(lm1))</code></pre>
+<p><img src="Linear-Regression-2_files/figure-html/unnamed-chunk-3-3.png" width="672" /></p>
+<pre class="r"><code># Let us also incorporate the number of visitors
+lm3 &lt;- lm(df$Sales ~ df$Competitors + df$Income_Level + df$Visitors)
+summary(lm3)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = df$Sales ~ df$Competitors + df$Income_Level + df$Visitors)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -129.640  -33.499    5.873   38.100  135.879 
+## 
+## Coefficients:
+##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)     -208.8365    73.2674  -2.850  0.00595 ** 
+## df$Competitors   -44.2134     7.1109  -6.218 5.02e-08 ***
+## df$Income_Level    6.8809     0.7689   8.949 1.05e-12 ***
+## df$Visitors        0.1932     0.0426   4.536 2.74e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 59.31 on 61 degrees of freedom
+## Multiple R-squared:  0.697,  Adjusted R-squared:  0.6821 
+## F-statistic: 46.77 on 3 and 61 DF,  p-value: 8.129e-16</code></pre>
+<pre class="r"><code># Plot the resiudals
+plot(residuals(lm3),fitted(lm3))</code></pre>
+<p><img src="Linear-Regression-2_files/figure-html/unnamed-chunk-3-4.png" width="672" /></p>
+<pre class="r"><code># What is the correlation between all explanatory variables?
+cor(df)</code></pre>
+<pre><code>##                   Sales Income_Level Competitors  Visitors
+## Sales        1.00000000    0.7079956  0.06661552 0.4269416
+## Income_Level 0.70799556    1.0000000  0.47428000 0.5306714
+## Competitors  0.06661552    0.4742800  1.00000000 0.7154595
+## Visitors     0.42694160    0.5306714  0.71545946 1.0000000</code></pre>
+</div>
+<div id="case-ii" class="section level3">
+<h3>Case II</h3>
+<pre class="r"><code># -----------------------------------------------------------------------------------------------
+# Case II: Estimating the Gender Bias with Mock Data
+# -----------------------------------------------------------------------------------------------
+
+df &lt;- read_excel(&quot;4_Employee_Salaries_Illustration.xlsx&quot;,  col_types = c(&quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;, &quot;text&quot;))
+
+df </code></pre>
+<pre><code>## # A tibble: 174 x 5
+##    `Salary ($000)` `Years of Experience` Group `Group x Years` Sex   
+##              &lt;dbl&gt;                 &lt;dbl&gt; &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt; 
+##  1             148                  16.7     1            16.7 male  
+##  2             165                   6.7     1             6.7 male  
+##  3             145                  14.8     1            14.8 male  
+##  4             139                  13.9     0             0   female
+##  5             128                   8.5     0             0   female
+##  6             173                  18.2     1            18.2 male  
+##  7             133                   9.1     0             0   female
+##  8             128                   4.7     1             4.7 male  
+##  9             154                  11.5     1            11.5 male  
+## 10             121                   8.5     0             0   female
+## # ... with 164 more rows</code></pre>
+<pre class="r"><code>df$male&lt;-ifelse(df$Sex==&quot;male&quot;,1,0)
+
+# Compute a model of salary on years of education and a dummy. 
+
+lm1&lt;-lm(df$`Salary ($000)`~ df$`Years of Experience`+ df$Group) 
+
+summary(lm1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = df$`Salary ($000)` ~ df$`Years of Experience` + 
+##     df$Group)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -27.4441  -6.9403  -0.8341   7.7577  31.3613 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)              133.4676     2.1315  62.616  &lt; 2e-16 ***
+## df$`Years of Experience`   0.8537     0.1925   4.435 1.64e-05 ***
+## df$Group                   1.0242     2.0576   0.498    0.619    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 11.78 on 171 degrees of freedom
+## Multiple R-squared:  0.1311, Adjusted R-squared:  0.1209 
+## F-statistic:  12.9 on 2 and 171 DF,  p-value: 6.047e-06</code></pre>
+<pre class="r"><code># Plot the data and both models in the same scatter!
+plot(df$`Salary ($000)`~ df$`Years of Experience`, main =&quot;Salary by Years of Experience and Gender&quot;, ylab= &quot;Salary in 1000 USD&quot;, xlab = &quot;Years of Experience&quot;)
+lines(133.4676+1.0242 + 0.8537*c(1:25),col=&quot;red&quot;)
+lines(133.4676+ 0.8537*c(1:25),col=&quot;blue&quot;)
+legend(&quot;bottomright&quot;, legend=c(&quot;MEN&quot;,&quot;WOMEN&quot;), lty=c(1,1), lwd=2, cex=1, col=c(&quot;red&quot;,&quot;blue&quot;))</code></pre>
+<p><img src="Linear-Regression-2_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code># What if the bias comes with the years of experience?
+# What if the entry salary of men and women is the same, but they develop differently accross time? 
+# Repeat the analysis but incorporate an interaction variable.
+
+
+# Let&#39;s go back to the slides and get some theoretical intuition.
+lm2&lt;-lm(df$`Salary ($000)`~ df$`Years of Experience`+df$Group + df$`Group x Years`) 
+summary(lm2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = df$`Salary ($000)` ~ df$`Years of Experience` + 
+##     df$Group + df$`Group x Years`)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -27.4266  -7.3921  -0.4461   7.6429  31.1329 
+## 
+## Coefficients:
+##                          Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)              130.9888     3.4902  37.531  &lt; 2e-16 ***
+## df$`Years of Experience`   1.1760     0.4076   2.885  0.00442 ** 
+## df$Group                   4.6113     4.4970   1.025  0.30663    
+## df$`Group x Years`        -0.4149     0.4625  -0.897  0.37088    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 11.79 on 170 degrees of freedom
+## Multiple R-squared:  0.1352, Adjusted R-squared:  0.1199 
+## F-statistic: 8.859 on 3 and 170 DF,  p-value: 1.728e-05</code></pre>
+<pre class="r"><code># How do you interpret the results?
+
+# Plot both models in a graph.
+
+# Plot the data and both models in the same scatter!
+plot(df$`Salary ($000)`~ df$`Years of Experience`, main =&quot;Salary by Years of Experience and Gender&quot;, ylab= &quot;Salary in 1000 USD&quot;, xlab = &quot;Years of Experience&quot;)
+lines(130.9888+4.6113 + (1.1760-0.4149)*c(1:25),col=&quot;red&quot;)
+lines(130.9888+ 1.1760*c(1:25),col=&quot;blue&quot;)
+legend(&quot;bottomright&quot;, legend=c(&quot;MEN&quot;,&quot;WOMEN&quot;), lty=c(1,1), lwd=2, cex=1, col=c(&quot;red&quot;,&quot;blue&quot;))</code></pre>
+<p><img src="Linear-Regression-2_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+</div>
+<div id="case-iii" class="section level3">
+<h3>Case III</h3>
+<pre class="r"><code># -----------------------------------------------------------------------------------------------
+# Case III: Holywood Rules
+# -----------------------------------------------------------------------------------------------
+
+df &lt;-  read_excel(&quot;5_HollywoodRules.xlsx&quot;,  col_types = c(&quot;text&quot;, &quot;numeric&quot;, &quot;numeric&quot;,
+                                                                                                  &quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;,
+                                                                                                  &quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;, 
+                                                                                                  &quot;text&quot;, &quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;, 
+                                                                                                  &quot;text&quot;, &quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;))
+
+
+# To obtain an initial overview of the data, calculate the minimum, average, and maximum values of the variables opening gross and total U.S. gross. 
+summary(df$totalnonusgross)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+##         0  15433097  42950069  59560983  75985298 456235122</code></pre>
+<pre class="r"><code># How many of the movies in the data set are comedies? 
+df$comedy&lt;-ifelse(df$genere == &quot;Comedy&quot;,1,0)
+sum(df$comedy)</code></pre>
+<pre><code>## [1] 23</code></pre>
+<pre class="r"><code># Calculate the U.S. return on investment (ROI)
+df$roi&lt;-(df$totalusgross-df$budget)/df$budget
+
+# 95% C.I.
+
+interval&lt;-mean(df$roi) + c(-1,+1) * qt(0.975,  df = length(df$roi)-1) * sd(df$roi)/sqrt(length(df$roi))
+interval</code></pre>
+<pre><code>## [1] 0.1348149 0.4510486</code></pre>
+<pre class="r"><code># Show that the mean U.S. ROI is significantly larger than the 12 percent London cited.
+
+# This requires a Lower-Tailed Test
+
+# H0:  μUS-ROI ≤ 0.12 (which we can reject by all means)
+
+xbar &lt;- mean(df$roi)            
+mu0 &lt;- 0.12       
+s = sd(df$roi)            
+n = 75
+
+t &lt;- (xbar-mu0)/(s/sqrt(n)) 
+t</code></pre>
+<pre><code>## [1] 2.179237</code></pre>
+<pre class="r"><code>pval = pt(t, df=n-1) 
+pval</code></pre>
+<pre><code>## [1] 0.9837514</code></pre>
+<pre class="r"><code># Compare the total U.S. box-office gross of movies from the comedy genre with movies from other genres. 
+# Is there a statistically significant difference between the total U.S. gross of comedies and non-comedy movies?
+
+# Test H0: μNon-Comedy = μComedy
+df$comedy&lt;-ifelse(df$genere == &quot;Comedy&quot;,1,0)
+sum(df$comedy)</code></pre>
+<pre><code>## [1] 23</code></pre>
+<pre class="r"><code>t.test(totalusgross ~ comedy, data = df)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  totalusgross by comedy
+## t = -1.3728, df = 47.176, p-value = 0.1763
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -32437354   6122596
+## sample estimates:
+## mean in group 0 mean in group 1 
+##        55585721        68743100</code></pre>
+<pre class="r"><code># Compute a sound model to predict total U.S. box-office gross of movies prior to production
+lm1&lt;-lm(totalusgross ~ budget + comedy + mpaad + sequel + knownstory + summer , data = df)
+summary(lm1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = totalusgross ~ budget + comedy + mpaad + sequel + 
+##     knownstory + summer, data = df)
+## 
+## Residuals:
+##       Min        1Q    Median        3Q       Max 
+## -68949761 -16104775  -6748563  12585634 108086427 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  1.578e+07  1.084e+07   1.455   0.1503    
+## budget       9.227e-01  1.659e-01   5.562 4.87e-07 ***
+## comedy       1.319e+07  8.968e+06   1.470   0.1461    
+## mpaad       -7.074e+06  1.052e+07  -0.672   0.5037    
+## sequel       2.987e+07  1.273e+07   2.346   0.0219 *  
+## knownstory  -1.124e+07  8.270e+06  -1.359   0.1785    
+## summer      -1.104e+07  8.728e+06  -1.265   0.2101    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 33350000 on 68 degrees of freedom
+## Multiple R-squared:   0.37,  Adjusted R-squared:  0.3144 
+## F-statistic: 6.656 on 6 and 68 DF,  p-value: 1.429e-05</code></pre>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

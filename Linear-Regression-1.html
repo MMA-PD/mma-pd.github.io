@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Pamela Dekpo" />
+
+
+<title>Linear Regression I</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 45px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h2 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h3 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h4 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h5 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h6 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Data Science for Business I</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Overview</a>
+</li>
+<li>
+  <a href="Summary-Data-Science.html">Inference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Linear Regression
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Linear-Regression-1.html">Linear Regression I</a>
+    </li>
+    <li>
+      <a href="Linear-Regression-2.html">Linear Regression II</a>
+    </li>
+    <li>
+      <a href="Detecting-Problems-in-Regression.html">Detecting Problems in Regression</a>
+    </li>
+    <li>
+      <a href="Predictive-Analysis.html">Predictive Analytics</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Unstruktured-Data.html">Unstruktured Data</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Linear Regression I</h1>
+<h4 class="author">Pamela Dekpo</h4>
+
+</div>
+
+
+<hr />
+<div id="modelling-understanding-simple-relationships-in-businesses" class="section level3">
+<h3>Modelling: Understanding Simple Relationships in Businesses</h3>
+<p>Here, we are primarily concerned with modeling a straight-line relationship between two variables using n pairs of observations on these variables, a common and fundamental task. One of these variables, conventionally denoted y, is a response or output variable. The other variable, often denoted x, is known as an explanatory or input or predictor variable.</p>
+<p><em>There are different types of relationships between x an y:</em></p>
+<div class="figure" style="text-align: center">
+<img src="Correlation.png" alt="..." width="80%" />
+<p class="caption">
+…
+</p>
+</div>
+<p>When the n points are plotted in two dimensions, they appear as a random scatter about some unknown straight line. We model this line as: <span class="math display">\[ Y_{i}=\beta _{0}+\beta _{1}x_{i}+\varepsilon _{i},\quad i=1,\dotsc ,n  \]</span></p>
+<p>The assumption on the error, implies that we assume that the response variable is linearly related to the predictor variables, plus a normally distributed random component. In this context, the intercept <span class="math inline">\(beta _{0}\)</span> and slope <span class="math inline">\(beta _{1}\)</span> are unknown parameters that must be estimated from the data. * A commonly used procedure for estimating is the method of least squares. * Coefficients are estimates of the unknown population parameters.</p>
+<div class="figure" style="text-align: center">
+<img src="Bild2.PNG" alt="..." width="50%" />
+<p class="caption">
+…
+</p>
+</div>
+<p><em>How to interprete the coefficients:</em></p>
+<table>
+<colgroup>
+<col width="45%" />
+<col width="54%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Intercept <span class="math inline">\(beta _{0}\)</span></th>
+<th>Slope <span class="math inline">\(beta _{1}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>stands for the estimated value of y when x is equal to zero.</td>
+<td>An increase of one unit in x, has an average impact of <span class="math inline">\(beta _{1}\)</span> on y.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Are the coefficients significant?</em> The computation of a regression model will (almost) always yield non-zero estimates for the parameters. However, this does not mean that each independent variable include in the model doeas have an impact on the dependent variable.</p>
+<ul>
+<li>To measure if a variable has a significant (significantly different from zero) impact on the dependent variable, you can conduct a hypothesis test.</li>
+<li>Test the Null Hypothesis</li>
+<li>If the corresponding p-value is below the threshold (10%, 5%, 1%, etc.) one can reject the H0.</li>
+</ul>
+<p><span class="math display">\[ H0: \beta _{0} = 0 \]</span> against <span class="math display">\[ H1: \beta _{1} != 0\]</span></p>
+<p><em>Measures of variation:</em></p>
+<ul>
+<li>SST = total sum of squares variation of the yi values around their mean.</li>
+<li>SSR = regression sum of squares explained variation attributable to the linear relationship between x and y.</li>
+<li>SSE = sum of squared errors variation attributable to factors other than the linear relationship between x and y.</li>
+</ul>
+<div class="figure" style="text-align: center">
+<img src="Bild3.PNG" alt="..." width="50%" />
+<p class="caption">
+…
+</p>
+</div>
+<p>The coefficient of determination is also called R-squared <span class="math display">\[R^2 = SSR/SST = regression sum of squares/total sum of squares \]</span> and can take a value form 0 to 1.</p>
+<hr />
+</div>
+<div id="the-bundesliga-case" class="section level3">
+<h3>The Bundesliga Case</h3>
+<pre class="r"><code># Import the data
+d &lt;- read_excel(&quot;2_Bundesliga.xlsx&quot;, col_types = c(&quot;text&quot;, &quot;numeric&quot;, &quot;numeric&quot;,  &quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;, &quot;numeric&quot;))
+
+# 1) What were the smallest, average, and largest market values of football teams in the Bundesliga in the 2011–2012 season? 
+
+summary(d$Marketvalue_2011)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max.      NA&#39;s 
+##  29000000  51250000  78500000  95536111 112250000 333000000         3</code></pre>
+<pre class="r"><code>summary(d$Marketvalue_2012)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+##  22950000  39250000  77650000  94848810 104300000 415950000</code></pre>
+<pre class="r"><code># 2) Develop a regression model that predicts the number of points a team earns in a season based on its market value. Write down the estimated regression equation. 
+
+# Reshufle the data
+c1&lt;-as.data.frame(c(d$Marketvalue_2011,d$Marketvalue_2012))
+c2&lt;-as.data.frame(c(d$Points_2011,d$Points_2012))
+d2&lt;-cbind(c1,c2)
+
+names(d2)[1]&lt;-&quot;Value&quot;
+names(d2)[2]&lt;-&quot;Points&quot;
+
+# Compute the model
+lm1&lt;- lm(d2$Points ~ d2$Value)
+summary(lm1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = d2$Points ~ d2$Value)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -15.0725  -6.6787   0.0467   4.7786  25.7984 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 3.157e+01  2.491e+00  12.675 1.95e-14 ***
+## d2$Value    1.496e-07  1.926e-08   7.765 4.93e-09 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 9.369 on 34 degrees of freedom
+##   (6 observations deleted due to missingness)
+## Multiple R-squared:  0.6394, Adjusted R-squared:  0.6288 
+## F-statistic: 60.29 on 1 and 34 DF,  p-value: 4.926e-09</code></pre>
+<pre class="r"><code># Change the units to have &quot;nicier&quot;  and recompute the model.
+d2$Value&lt;-d2$Value/1000000
+
+lm1&lt;- lm(d2$Points ~ d2$Value)
+summary(lm1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = d2$Points ~ d2$Value)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -15.0725  -6.6787   0.0467   4.7786  25.7984 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 31.57067    2.49077  12.675 1.95e-14 ***
+## d2$Value     0.14956    0.01926   7.765 4.93e-09 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 9.369 on 34 degrees of freedom
+##   (6 observations deleted due to missingness)
+## Multiple R-squared:  0.6394, Adjusted R-squared:  0.6288 
+## F-statistic: 60.29 on 1 and 34 DF,  p-value: 4.926e-09</code></pre>
+<pre class="r"><code># 3) An intuitive claim may be that, on average, a team earns twice as many points in an entire season as it earns in the first half of the season. Can you support this?
+c3&lt;-as.data.frame(c(d$Mid_Season_Points_2011,d$Mid_Season_Points_2012))
+
+names(c3)[1]&lt;-&quot;MSPoints&quot;
+
+d2&lt;-cbind(d2,c3)
+
+lm2&lt;- lm(d2$Points ~ d2$MSPoints)
+
+summary(lm2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = d2$Points ~ d2$MSPoints)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -14.582  -4.358   0.800   4.499  15.602 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   5.4478     4.2063   1.295    0.204    
+## d2$MSPoints   1.7632     0.1715  10.283 5.69e-12 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 7.696 on 34 degrees of freedom
+##   (6 observations deleted due to missingness)
+## Multiple R-squared:  0.7567, Adjusted R-squared:  0.7495 
+## F-statistic: 105.7 on 1 and 34 DF,  p-value: 5.688e-12</code></pre>
+<pre class="r"><code># Test the Hypothesis H0: Beta 1 = 2
+# sample mean 
+xbar &lt;- 1.7632
+
+# hypothesized value
+mu0 &lt;- 2
+
+# population standard deviation
+s&lt;- 0.1715
+
+# sample size 
+n &lt;- 36
+
+# t value formula (to get our test statistic z)
+t &lt;- (xbar-mu0)/s
+t</code></pre>
+<pre><code>## [1] -1.380758</code></pre>
+<pre class="r"><code># p-value formula
+pval = 2*pt(-abs(t), df=n-1)
+pval</code></pre>
+<pre><code>## [1] 0.1761075</code></pre>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
